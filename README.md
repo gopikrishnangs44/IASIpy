@@ -10,3 +10,6 @@ follow the steps
 2. pip install .
 
 Please refer to EXAMPLE.ipynb in this repository to see the use of this package
+
+
+NEW UPDATE INCLUDES GOME2-IASI LISA PROCESSINF ROUTINE
