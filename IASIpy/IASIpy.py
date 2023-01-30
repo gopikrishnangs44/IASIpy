@@ -74,3 +74,45 @@ def save_iasi(yr_month_date, path, var, var_dim, interval_HMMSS, n_levs_start, n
         hh.to_netcdf(''+str(path)+'out/'+str(ij[-42:])+'')
         print('SAVED TO '+str(path)+'out/'+str(ij[-42:])+'')
 
+        
+def iasi_LISA(filename,hour,level):
+    a = xr.open_dataset(filename)
+    time_se = 1167589800 + a.time
+    a['time'] = time_se
+    dt = []
+    for i in (a.time):
+        dt.append(datetime.fromtimestamp(i))
+    ddt = pd.to_datetime(dt)
+    a['time'] = ddt
+    data = a['ozone_mixing_ratio_profile'].isel(nlevels=level)
+    lat,lon=a.latitude, a.longitude
+    nlat,nlon = np.arange(-90,90.5,0.5),np.arange(-180,180.5,0.5)
+    if hour==[]:
+        dd = []
+        for i in range(24):
+            try:
+                lat1 = lat.sel(time = lat.time.dt.hour.isin([i]))
+                lon1 = lon.sel(time = lon.time.dt.hour.isin([i]))
+                data1 = data.sel(time = data.time.dt.hour.isin([i]))
+                k = interp_fun(lat1,lon1,data1)
+            except:
+                k = xr.DataArray(np.zeros([361,721]), coords=[k.lat, k.lon], dims=['lat','lon'])
+                k = k.where(k!=0, np.nan)
+            dd.append(k)
+        dd1 = xr.DataArray(dd, coords=[range(24), k.lat, k.lon], dims=['hour_of_the_day','lat','lon'])
+        dd = []
+    else:
+        dd = []
+        for i in hour:
+            try:
+                lat1 = lat.sel(time = lat.time.dt.hour.isin(hour))
+                lon1 = lon.sel(time = lon.time.dt.hour.isin(hour))
+                data1 = data.sel(time = data.time.dt.hour.isin(hour))
+                k = interp_fun(lat1,lon1,data1)
+            except:
+                k = xr.DataArray(np.zeros([361,721]), coords=[nlat, nlon], dims=['lat','lon'])
+                k = k.where(k!=0, np.nan)
+            dd.append(k)
+        dd1 = xr.DataArray(dd, coords=[hour, k.lat, k.lon], dims=['hour_of_the_day','lat','lon'])
+        dd = []
+    return dd1
