@@ -7,6 +7,9 @@ import glob
 
 def interp_fun(lat,lon,data):
     lat,lon,data = np.array(lat),np.array(lon),np.array(data)
+    data = np.nan_to_num(data,nan=-9999)
+    nan_index = np.argwhere(data==-9999)
+    lat,lon, data = np.delete(lat, nan_index),np.delete(lon, nan_index),np.delete(data, nan_index)
     nlat = np.arange(-90,90.5,0.5)
     nlon = np.arange(-180,180.5,0.5)
     pp = pd.DataFrame(np.zeros((361,721)))
